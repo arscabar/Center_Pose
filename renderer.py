@@ -246,6 +246,14 @@ class Renderer:
         renderer.delete()
 
         if return_rgba:
+            # Ensure RGBA format (some pyrender versions may return RGB only)
+            if color.shape[2] == 3:
+                # Add alpha channel (fully opaque where there's content)
+                alpha = np.ones((color.shape[0], color.shape[1], 1), dtype=np.float32)
+                # Set alpha to 0 where the color is black (background)
+                mask = np.any(color > 0.01, axis=2, keepdims=True)
+                alpha = mask.astype(np.float32)
+                color = np.concatenate([color, alpha], axis=2)
             return color
 
         valid_mask = (color[:, :, -1])[:, :, np.newaxis]
@@ -333,6 +341,13 @@ class Renderer:
         color = color.astype(np.float32) / 255.0
         renderer.delete()
 
+        # Ensure RGBA format (some pyrender versions may return RGB only)
+        if color.shape[2] == 3:
+            alpha = np.ones((color.shape[0], color.shape[1], 1), dtype=np.float32)
+            mask = np.any(color > 0.01, axis=2, keepdims=True)
+            alpha = mask.astype(np.float32)
+            color = np.concatenate([color, alpha], axis=2)
+
         return color
 
     def render_rgba_multiple(
@@ -382,6 +397,13 @@ class Renderer:
         color, rend_depth = renderer.render(scene, flags=pyrender.RenderFlags.RGBA)
         color = color.astype(np.float32) / 255.0
         renderer.delete()
+
+        # Ensure RGBA format (some pyrender versions may return RGB only)
+        if color.shape[2] == 3:
+            alpha = np.ones((color.shape[0], color.shape[1], 1), dtype=np.float32)
+            mask = np.any(color > 0.01, axis=2, keepdims=True)
+            alpha = mask.astype(np.float32)
+            color = np.concatenate([color, alpha], axis=2)
 
         return color
 
