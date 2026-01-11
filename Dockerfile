@@ -62,9 +62,10 @@ ENV CONDA_DEFAULT_ENV=4D-humans
 ENV PATH=/opt/conda/envs/4D-humans/bin:$PATH
 
 # 2. Install PyTorch with CUDA 12.1 support
+# IMPORTANT: Use --override-channels to ensure we get CUDA version from pytorch channel
 RUN /bin/bash -c "source activate 4D-humans && \
-    conda install -y numpy && \
-    conda install -y pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia && \
+    conda install -y numpy -c conda-forge && \
+    conda install -y pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia --override-channels && \
     echo '=== Verifying PyTorch CUDA installation ===' && \
     python -c 'import torch; print(f\"PyTorch version: {torch.__version__}\"); print(f\"CUDA available: {torch.cuda.is_available()}\"); print(f\"CUDA version: {torch.version.cuda}\"); assert torch.cuda.is_available(), \"ERROR: CUDA is not available in PyTorch!\"' && \
     echo '=== PyTorch CUDA verification successful! ==='"
