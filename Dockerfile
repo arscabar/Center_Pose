@@ -104,14 +104,16 @@ ENV PYOPENGL_PLATFORM=osmesa
 WORKDIR /app
 COPY . /app
 
-# Install 4D-Humans/HMR2 from GitHub
+# Install additional dependencies for 4D-Humans
 RUN /bin/bash -c "source activate 4D-humans && \
-    pip install git+https://github.com/shubham-goel/4D-Humans.git"
+    pip install gdown einops webdataset dill"
 
-# --- Apply code modifications inside Docker ---
-
-# Note: We use the local renderer.py which has all fixes applied
-# No need to patch the installed hmr2 package since we import from local renderer.py
+# Clone and manually install 4D-Humans to avoid chumpy build issues
+RUN /bin/bash -c "source activate 4D-humans && \
+    cd /tmp && \
+    git clone https://github.com/shubham-goel/4D-Humans.git && \
+    cd 4D-Humans && \
+    pip install --no-deps -e ."
 
 # [Mounting Point] Create cache directory for binding
 RUN mkdir -p /root/.cache/4DHumans
