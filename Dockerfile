@@ -85,6 +85,7 @@ RUN /bin/bash -c "source activate 4D-humans && \
     trimesh \
     smplx \
     ultralytics \
+    lap \
     PySide6 \
     pytorch-lightning \
     timm \
