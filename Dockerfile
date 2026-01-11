@@ -91,8 +91,11 @@ RUN /bin/bash -c "source activate 4D-humans && \
     pandas \
     open3d \
     gradio \
-    chumpy \
     && pip cache purge"
+
+# 4. Install chumpy separately with no-build-isolation to avoid setup.py issues
+RUN /bin/bash -c "source activate 4D-humans && \
+    pip install --no-build-isolation chumpy"
 
 # Set Python environment variables for pyrender
 ENV PYOPENGL_PLATFORM=osmesa
