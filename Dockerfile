@@ -54,13 +54,8 @@ RUN wget --quiet https://github.com/conda-forge/miniforge/releases/latest/downlo
     rm ~/miniforge.sh
 ENV PATH=$CONDA_DIR/bin:$PATH
 
-# Copy environment files
-COPY 4D-Humans_disabled/environment.yml /tmp/environment.yml
-COPY 4D-Humans_disabled/hmr2 /4D-Humans_disabled/hmr2
-
-# 1. Create environment WITHOUT pip packages first
-RUN sed -i '/pip:/Q' /tmp/environment.yml && \
-    conda env create -f /tmp/environment.yml
+# Create conda environment
+RUN conda create -n 4D-humans python=3.10 -y
 
 # Set environment variables
 ENV CONDA_DEFAULT_ENV=4D-humans
@@ -74,12 +69,11 @@ RUN /bin/bash -c "source activate 4D-humans && \
 # 3. Install remaining dependencies manually
 RUN /bin/bash -c "source activate 4D-humans && \
     pip uninstall -y opencv-python && \
-    pip install --no-build-isolation \
+    pip install \
     pyopengl==3.1.4 \
     opencv-python-headless \
     scikit-image \
     scipy \
-    chumpy \
     tqdm \
     yacs \
     termcolor \
@@ -87,7 +81,7 @@ RUN /bin/bash -c "source activate 4D-humans && \
     iopath \
     cloudpickle \
     omegaconf \
-    pyrender --upgrade \
+    pyrender \
     trimesh \
     smplx \
     ultralytics \
@@ -97,6 +91,7 @@ RUN /bin/bash -c "source activate 4D-humans && \
     pandas \
     open3d \
     gradio \
+    chumpy \
     && pip cache purge"
 
 # Set Python environment variables for pyrender
@@ -106,27 +101,14 @@ ENV PYOPENGL_PLATFORM=osmesa
 WORKDIR /app
 COPY . /app
 
-# [FIX] Install 4D-Humans from local source (with our fixes) instead of git
+# Install 4D-Humans/HMR2 from GitHub
 RUN /bin/bash -c "source activate 4D-humans && \
-    cd /app/4D-Humans_disabled && \
-    pip install -e ."
+    pip install git+https://github.com/shubham-goel/4D-Humans.git"
 
 # --- Apply code modifications inside Docker ---
 
-# 1. Correct sys.path
-RUN sed -i 's|sys.path.append(os.path.join(current_dir, "4D-Humans_disabled"))|sys.path.append(os.path.join("/app", "4D-Humans_disabled"))|g' /app/main_4d_hybrid.py
-RUN sed -i 's|sys.path.append(os.path.join(current_dir, "4D-Humans_disabled"))|sys.path.append(os.path.join("/app", "4D-Humans_disabled"))|g' /app/web_ui.py
-
-# 2. Set PYOPENGL_PLATFORM in renderer.py to 'osmesa'
-RUN sed -i "s|os.environ\['PYOPENGL_PLATFORM'\] = 'egl'|os.environ['PYOPENGL_PLATFORM'] = 'osmesa'|g" /app/4D-Humans_disabled/hmr2/utils/renderer.py
-RUN sed -i "s|os.environ\['PYOPENGL_PLATFORM'\] = 'opengl'|os.environ['PYOPENGL_PLATFORM'] = 'osmesa'|g" /app/4D-Humans_disabled/hmr2/utils/renderer.py
-
-# 3. Add weights_only=False
-RUN sed -i 's|model = HMR2.load_from_checkpoint(checkpoint_path, strict=False, cfg=model_cfg)|model = HMR2.load_from_checkpoint(checkpoint_path, strict=False, cfg=model_cfg, weights_only=False)|g' /app/4D-Humans_disabled/hmr2/models/__init__.py
-
-# [CRITICAL FIX FINAL] 4. Use 'sed' to patch renderer.py (Safe & Fast)
-# This replaces the line causing the crash with a conditional logic, without using python -c
-RUN sed -i "s|image = cv2.imread(imgname).astype(np.float32)\[:, :, ::-1\] / 255.|image = (cv2.imread(imgname) if isinstance(imgname, str) else imgname).astype(np.float32)[:, :, ::-1] / 255.|g" /app/4D-Humans_disabled/hmr2/utils/renderer.py
+# Note: We use the local renderer.py which has all fixes applied
+# No need to patch the installed hmr2 package since we import from local renderer.py
 
 # [Mounting Point] Create cache directory for binding
 RUN mkdir -p /root/.cache/4DHumans
