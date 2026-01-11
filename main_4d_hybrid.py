@@ -177,12 +177,13 @@ class AnalysisThread(QThread):
             # Render the 3D mesh onto the image
             # [FIX] imgname=frame 추가하여 빈 문자열 문제 해결
             rendered_person_rgba = self.renderer(
-                vertices_3d, 
-                full_cam_t, 
+                vertices_3d,
+                full_cam_t,
                 image=torch.from_numpy(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0).permute(2,0,1).to(self.device),
                 full_frame=True,
                 imgname=frame,  # [FIX] numpy 배열로 프레임 직접 전달
-                scene_bg_color=(0,0,0)
+                scene_bg_color=(0,0,0),
+                return_rgba=True
             )
             
             # Convert rendered output to BGR for OpenCV

@@ -13,7 +13,7 @@ sys.path.append(os.path.join(current_dir, "4D-Humans_disabled"))
 
 try:
     from hmr2.models import load_hmr2, DEFAULT_CHECKPOINT
-    from hmr2.utils.renderer import Renderer, cam_crop_to_full
+    from renderer import Renderer, cam_crop_to_full
     HMR2_AVAILABLE = True
 except ImportError as e:
     print(f"[Warning] Failed to load 4D-Humans module: {e}")
@@ -118,11 +118,12 @@ class JudoAnalyzer:
             ).squeeze(0).cpu().numpy()
 
             rendered_person_rgba = self.renderer(
-                vertices_3d, 
-                full_cam_t, 
+                vertices_3d,
+                full_cam_t,
                 image=torch.from_numpy(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB).astype(np.float32) / 255.0).permute(2,0,1).to(self.device),
                 full_frame=True,
-                scene_bg_color=(0,0,0)
+                scene_bg_color=(0,0,0),
+                return_rgba=True
             )
             
             rendered_person_bgr = cv2.cvtColor((rendered_person_rgba[:,:,:3] * 255).astype(np.uint8), cv2.COLOR_RGB2BGR)
