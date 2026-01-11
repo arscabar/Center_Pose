@@ -1,5 +1,5 @@
 # Use a NVIDIA CUDA base image for GPU support
-FROM nvidia/cuda:11.8.0-cudnn8-devel-ubuntu22.04
+FROM nvidia/cuda:12.1.0-cudnn8-devel-ubuntu22.04
 
 # Set environment variables for non-interactive installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -63,7 +63,7 @@ ENV PATH=/opt/conda/envs/4D-humans/bin:$PATH
 
 # 2. Install PyTorch, Numpy & Detectron2 explicitly
 RUN /bin/bash -c "source activate 4D-humans && \
-    conda install -y numpy pytorch torchvision torchaudio pytorch-cuda=11.8 -c pytorch -c nvidia && \
+    conda install -y numpy pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia && \
     pip install --no-build-isolation git+https://github.com/facebookresearch/detectron2.git"
 
 # 3. Install remaining dependencies manually
