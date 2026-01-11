@@ -42,7 +42,13 @@ class AnalysisThread(QThread):
         
         # --- 모델 초기화 ---
         self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-        
+        print(f"[INFO] Using device: {self.device}")
+        if torch.cuda.is_available():
+            print(f"[INFO] GPU: {torch.cuda.get_device_name(0)}")
+            print(f"[INFO] GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1024**3:.2f} GB")
+        else:
+            print("[WARNING] CUDA not available! Running on CPU (will be very slow)")
+
         # 1. 탐지기: YOLOv8
         self.yolo = YOLO('yolov8n.pt')
         
