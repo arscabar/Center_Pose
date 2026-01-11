@@ -2,3 +2,15 @@ models_cache/
 build/
 dist/
 .venv/
+env/
+venv/
+__pycache__/
+
+**/*.ckpt
+**/*.tar.gz
+**/*.pkl
+**/*.npz
+**/*.pth
+**/*.safetensors
+
+hmr2_data/
