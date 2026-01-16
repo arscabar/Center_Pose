@@ -70,6 +70,7 @@ RUN /bin/bash -c "source activate 4D-humans && \
     python -c 'import torch; print(f\"PyTorch version: {torch.__version__}\"); print(f\"CUDA version: {torch.version.cuda}\"); assert torch.version.cuda is not None, \"ERROR: PyTorch is not CUDA-enabled!\"' && \
     echo '=== PyTorch CUDA verification successful! ==='"
 
+
 # 3. Install Detectron2
 RUN /bin/bash -c "source activate 4D-humans && \
     pip install --no-build-isolation git+https://github.com/facebookresearch/detectron2.git"
