@@ -67,7 +67,7 @@ RUN /bin/bash -c "source activate 4D-humans && \
     conda config --env --set channel_priority strict && \
     conda install -y pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -c conda-forge && \
     echo '=== Verifying PyTorch CUDA installation ===' && \
-    python -c 'import torch; print(f\"PyTorch version: {torch.__version__}\"); print(f\"CUDA available: {torch.cuda.is_available()}\"); print(f\"CUDA version: {torch.version.cuda}\"); assert torch.cuda.is_available(), \"ERROR: CUDA is not available in PyTorch!\"' && \
+    python -c 'import torch; print(f\"PyTorch version: {torch.__version__}\"); print(f\"CUDA version: {torch.version.cuda}\"); assert torch.version.cuda is not None, \"ERROR: PyTorch is not CUDA-enabled!\"' && \
     echo '=== PyTorch CUDA verification successful! ==='"
 
 # 3. Install Detectron2
@@ -100,7 +100,8 @@ RUN /bin/bash -c "source activate 4D-humans && \
     pandas \
     open3d \
     gradio \
-    && pip cache purge"
+    && pip cache purge && \
+    python -c 'import torch; print(f\"Post-pip PyTorch version: {torch.__version__}\"); print(f\"Post-pip CUDA version: {torch.version.cuda}\"); assert torch.version.cuda is not None, \"ERROR: PyTorch was overwritten with a CPU version during pip install!\"'"
 
 # 5. Install chumpy separately with no-build-isolation to avoid setup.py issues
 RUN /bin/bash -c "source activate 4D-humans && \
